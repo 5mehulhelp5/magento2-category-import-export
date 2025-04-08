@@ -11,6 +11,8 @@ use Exception;
 use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\ResourceModel\Category as ResourceCategory;
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Phrase;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 
 use function str_replace;
@@ -39,21 +41,7 @@ class PopulateCategoryCodeV1 implements DataPatchInterface
     public function apply(): self
     {
         $collection = $this->collecionFactory->create();
-        $categories = $collection->addAttributeToSelect([
-            'entity_id',
-            'description',
-            'name',
-            'url',
-            'category_code',
-            'path',
-            'path_ids',
-            'url_key',
-            'is_active',
-            'include_in_menu',
-            'meta_title',
-            'store_id',
-            'parent_id'
-        ])->getItems();
+        $categories = $collection->addAttributeToSelect(['entity_id', 'name', 'category_code', 'path'])->getItems();
 
         $idsToName = [];
         /** @var Category $category */
@@ -64,18 +52,20 @@ class PopulateCategoryCodeV1 implements DataPatchInterface
         /** @var Category $category */
         foreach ($categories as $category) {
             if (!$category->getData('category_code')) {
-                $code = '';
+                $code = [];
                 foreach ($category->getPathIds() as $pathId) {
-                    if ($pathId !== '1') {
-                        if ($code === '') {
-                            $code = $idsToName[$pathId];
-                        } else {
-                            $code .= '_' . $idsToName[$pathId];
-                        }
+                    if ($pathId === '') {
+                        throw new LocalizedException(
+                            new Phrase(
+                                'Category "%1" has an invalid path: %2.',
+                                [$category->getName(), $category->getPath()]
+                            )
+                        );
                     }
+                    $code[] = $idsToName[$pathId];
                 }
 
-                $category->setCustomAttribute('category_code', strtolower(str_replace(' ', '_', $code)));
+                $category->setCustomAttribute('category_code', strtolower(str_replace(' ', '_', implode('_', $code))));
                 $this->resourceCategory->saveAttribute($category, 'category_code');
             }
         }
