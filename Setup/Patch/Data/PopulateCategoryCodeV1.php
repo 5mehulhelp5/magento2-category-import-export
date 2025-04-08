@@ -36,7 +36,7 @@ class PopulateCategoryCodeV1 implements DataPatchInterface
     /**
      * @throws Exception
      */
-    public function apply(): void
+    public function apply(): self
     {
         $collection = $this->collecionFactory->create();
         $categories = $collection->addAttributeToSelect([
@@ -79,5 +79,7 @@ class PopulateCategoryCodeV1 implements DataPatchInterface
                 $this->resourceCategory->saveAttribute($category, 'category_code');
             }
         }
+
+        return $this;
     }
 }
