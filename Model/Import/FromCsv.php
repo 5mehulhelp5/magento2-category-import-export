@@ -16,6 +16,7 @@ use Opengento\CategoryImportExport\Model\Csv\Options;
 use function array_combine;
 use function array_map;
 use function array_shift;
+use function count;
 
 class FromCsv
 {
@@ -43,6 +44,11 @@ class FromCsv
 
         $data = [];
         foreach ($rows as $row) {
+            if ($keysCount !== count($row)) {
+                throw new InputException(
+                    new Phrase('The number of column does not match the keys. Please verify the field separator.')
+                );
+            }
             $data[] = array_combine($keys, $row);
         }
 
