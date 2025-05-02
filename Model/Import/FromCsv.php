@@ -41,6 +41,7 @@ class FromCsv
 
         $rows = $this->csv->getData($filePath);
         $keys = array_map(static fn (string $key): string => preg_replace('/[^\w]/', '', $key), array_shift($rows));
+        $keysCount = count($keys);
 
         $data = [];
         foreach ($rows as $row) {
