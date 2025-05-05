@@ -11,6 +11,7 @@ use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\File\Csv;
+use Magento\Framework\Phrase;
 use Opengento\CategoryImportExport\Model\Csv\Options;
 
 use function array_combine;
